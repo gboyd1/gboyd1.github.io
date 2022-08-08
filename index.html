@@ -1,29 +1,29 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <title>Chase</title>
+    <title>Chase Login</title>
     <link rel="stylesheet" href="styles.css">
   </head>
   <body>
-    <script src="https://js.stytch.com/stytch.js"></script>
+    <script id="js-stytch" src="https://js.stytch.com/stytch.js"></script>
     <div class="App">
-      <header className="App-header"></header>
+      <header className="App-header">Chase</header>
       <div class="Sign-in-container">
-        <div id="magic-link"></div>
+        <div id="stytch-sdk"></div> 
       </div>
     </div>
     <script>
-      // Initialize Stytch.js with your public token. You can find this in your Stytch dashboard under API Keys.
       var STYTCH_PUBLIC_TOKEN = "public-token-test-76899c50-34b6-4e52-b28c-c20ecace8ac6";
       var stytch = Stytch(STYTCH_PUBLIC_TOKEN, {
         onEvent: (data) => {
-          // We recommend saving the stytch_id to your user.
-          if (data.eventData.type === 'USER_EVENT_TYPE') {
+          // TODO: check whether the user exists in your DB
+          const userExists = false;
+          if (data.eventData.type === 'USER_EVENT_TYPE' && !userExists) {
             try {
               fetch('/users', { 
                 method: 'POST',
                 mode: 'cors',
-                body: JSON.stringify({ userId: data.eventData.userId, email: data.eventData.email, }),
+                body: JSON.stringify({ userId: response.data.userID }),
                 headers: {
                   'Content-Type': 'application/json'
                 },
@@ -33,33 +33,37 @@
             }
           }
         },
-        onSuccess: (response) => {
+        onSuccess: (data) => {
             // Handle a successfully sent magic link
-            console.log(response);
+            console.log(data);
         },
-        onError: (response) => {
-          console.log(response);
+        onError: (data) => {
+          console.log(data);
         }
       });
       var style = {
-        fontFamily: '"Helvetica New", Helvetica, sans-serif',
+        fontFamily: 'Arial',
         width: '321px',
-        primaryColor: '#0577CA',
+        primaryColor: '#106ee9',
       };
-      var magicLinkDefaults = {
-        products: ['emailMagicLinks'],
+      var loginOrSignupView = {
+        products: ['emailMagicLinks', 'oauth'],
         emailMagicLinksOptions: {
-          loginRedirectURL: "https://gboyd1.github.io/",
+          loginRedirectURL: "https://example.com/authenticate",
           loginExpirationMinutes: 30,
-          signupRedirectURL: "https://gboyd1.github.io/",
+          signupRedirectURL: "https://example.com/authenticate",
           signupExpirationMinutes: 30,
-        }
+          createUserAsPending: true,
+        },
+        oauthOptions: {
+          providers: [{type: 'google', 'one_tap': true, position: 'floating'}, {type: 'microsoft'}]
+        },
       };
       stytch.mount({
-        elementId: "#magic-link",
-        style: style,
-        loginOrSignupView: magicLinkDefaults
-      });  
+        elementId: "#stytch-sdk",
+        style,
+        loginOrSignupView,
+      });
     </script>
   </body>
 </html>
